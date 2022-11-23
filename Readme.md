@@ -1,4 +1,4 @@
-This demonstrates how you can add security to a campaign query resolvers while still resolving the User Directory specific data by adding the type in the User Directory service.
+This demonstrates how you can add security to a campaign query resolvers while still resolving the User Directory specific data in the User Directory service.
 
 npm run install -> in each folder
 npm run start -> in each folder
