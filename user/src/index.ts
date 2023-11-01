@@ -4,9 +4,15 @@ import { buildSubgraphSchema } from '@apollo/subgraph';
 import { gql } from "graphql-tag";
 const main = async () => {
 	const typeDefs = gql`
+		enum ActiveStatus {
+			SOON
+			ACTIVE
+			DEACTIVATED
+		}
 		type Site @key(fields: "id") {
 			id: ID!
 			name: String
+			status: ActiveStatus
 			location: String
 			participants: [Participant!]!
 		}
@@ -24,14 +30,19 @@ const main = async () => {
 	`;
 
 	const resolvers = {
+		ActiveStatus: {
+			SOON: "SOON",
+			ACTIVE: "ACTIVE",
+			DEACTIVE: "DEACTIVE"
+		},
 		Participant: {
 			site: async (parent: any, args: any, context: any, info: any) => {
 				console.log("Participant site resolver");
 				return [
-					{ id: "1", name: "foo", location: "moo" },
-					{ id: "2", name: "boo", location: "sue" },
-					{ id: "3", name: "noo", location: "too" },
-					{ id: "4", name: "rue", location: "poo" },
+					{ id: "1", name: "foo", location: "moo", activeStatus: "ACTIVE" },
+					{ id: "2", name: "boo", location: "sue", activeStatus: "ACTIVE"  },
+					{ id: "3", name: "noo", location: "too" , activeStatus: "ACTIVE" },
+					{ id: "4", name: "rue", location: "poo", activeStatus: "ACTIVE"  },
 				].filter((s) => parent.siteId === s.id)[0]
 				
 			}
@@ -44,6 +55,10 @@ const main = async () => {
 			location: (parent: any) => {
 				console.log("Site location resolver");
 				return parent.location === "moo" ? "ohio" : "alaska";
+			},
+			status: (parent: any) => {
+				console.log("Site status resolver");
+				return parent.activeStatus;
 			},
 			participants: async (parent: any, args: any, context: any, info: any) => {
 				console.log("Site participants resolver");
@@ -65,10 +80,10 @@ const main = async () => {
 			__resolveReference(siteRepresentation: any) {
 				console.log("Site resolve reference", siteRepresentation)
 				return [
-					{ id: "1", name: "foo", location: "moo" },
-					{ id: "2", name: "boo", location: "sue" },
-					{ id: "3", name: "noo", location: "too" },
-					{ id: "4", name: "rue", location: "poo" },
+					{ id: "1", name: "foo", location: "moo", activeStatus: "ACTIVE"},
+					{ id: "2", name: "boo", location: "sue", activeStatus: "ACTIVE"},
+					{ id: "3", name: "noo", location: "too", activeStatus: "ACTIVE"},
+					{ id: "4", name: "rue", location: "poo", activeStatus: "ACTIVE"},
 				]
 					.filter(
 						(s) =>
@@ -84,10 +99,10 @@ const main = async () => {
 			getSite: async (parent: any, args: any, context: any, info: any) => {
 				console.log("getSite resolver", args);
 				return [
-					{ id: "1", name: "foo", location: "moo" },
-					{ id: "2", name: "boo", location: "sue" },
-					{ id: "3", name: "noo", location: "too" },
-					{ id: "4", name: "rue", location: "poo" },
+					{ id: "1", name: "foo", location: "moo", activeStatus: "ACTIVE" },
+					{ id: "2", name: "boo", location: "sue", activeStatus: "ACTIVE"  },
+					{ id: "3", name: "noo", location: "too", activeStatus: "ACTIVE"  },
+					{ id: "4", name: "rue", location: "poo", activeStatus: "ACTIVE"  },
 				]
 					.filter(
 						(s) =>
