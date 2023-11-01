@@ -4,43 +4,49 @@ import { buildSubgraphSchema } from "@apollo/subgraph";
 import { gql } from "graphql-tag";
 const main = async () => {
 	const typeDefs = gql`
-		type Campaign {
+		type User {
 			id: ID
-			participants: [Participant]
+			sites: [Site!]!
 		}
 
-		type Participant @key(fields: "id") {
-			id: ID!
+		type Site @key(fields: "id"){
+		  id: ID!
+		  companionSiteId: String!
 		}
 
 		type Query {
-			participant(id: ID!,token: String): Participant
-			campaign(id: ID!,token: String): Campaign
+			user(id: ID!,token: String): User
 		}
 	`;
 
 	const resolvers = {
-		Participant: {
+		Site: {
+			__resolveReference(object: any) {
+				console.log("Site resolve reference", object)
+				const sites = [
+					{ id: "1", companionSiteId: "21" },
+					{ id: "2", companionSiteId: "22" },
+					{ id: "3", companionSiteId: "23" },
+					{ id: "4", companionSiteId: "24" },
+				]
+				return sites.find(site => site.id === object.id)
+			}
 		},
 		Query: {
-			participant(_:any,data:any) {
-				// So you can run your checks for security here in campaigns
-				// In the case Jennifer mentioned you would check to see if this participant has an active fundraiser
-				// If you throw an error here the part that lives in user directory will not resolve
-				if(data.token === "bad") {
-					throw new Error("Not authed")
-				}
-				return { id: data.id};
-			},
-			campaign(_:any, data:any) {
-				// So you can run your checks for security here in campaigns
-				// In the case Jennifer mentioned you would just check to see if the user is a group leader
-				if(data.token === "bad") {
+			user(_: any, data: any) {
+				console.log("User resolver", data)
+				// So you can run your checks for security here in users
+				if (data.token === "bad") {
 					throw new Error("Not authed")
 				}
 				return {
 					id: data.id,
-					participants: [{id:"1"}, {id:"2"}, {id:"3"}, {id:"4"}],
+					sites: [
+						{ id: "1", companionSiteId: "21" },
+						{ id: "2", companionSiteId: "22" },
+						{ id: "3", companionSiteId: "23" },
+						{ id: "4", companionSiteId: "24" },
+					],
 				};
 			},
 		},
