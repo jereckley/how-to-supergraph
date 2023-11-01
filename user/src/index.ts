@@ -8,6 +8,14 @@ const main = async () => {
 			id: ID!
 			name: String
 			location: String
+			participants: [Participant!]!
+		}
+		
+		type Participant {
+			id: ID!
+			firstName: String!
+			lastName: String!
+			site: Site!
 		}
 		
 		type Query {
@@ -16,7 +24,44 @@ const main = async () => {
 	`;
 
 	const resolvers = {
+		Participant: {
+			site: async (parent: any, args: any, context: any, info: any) => {
+				console.log("Participant site resolver");
+				return [
+					{ id: "1", name: "foo", location: "moo" },
+					{ id: "2", name: "boo", location: "sue" },
+					{ id: "3", name: "noo", location: "too" },
+					{ id: "4", name: "rue", location: "poo" },
+				].filter((s) => parent.siteId === s.id)[0]
+				
+			}
+		},
 		Site: {
+			name: (parent: any) => {
+				console.log("Site name resolver");
+				return parent.name.toUpperCase();
+			},
+			location: (parent: any) => {
+				console.log("Site location resolver");
+				return parent.location === "moo" ? "ohio" : "alaska";
+			},
+			participants: async (parent: any, args: any, context: any, info: any) => {
+				console.log("Site participants resolver");
+				return [
+					{ id: "1", firstName: "foo", lastName: "moo", siteId: "1" },
+					{ id: "2", firstName: "boo", lastName: "sue", siteId: "2" },
+					{ id: "3", firstName: "noo", lastName: "too", siteId: "3" },
+					{ id: "4", firstName: "rue", lastName: "poo", siteId: "4" },
+				]
+					.filter(
+						(s) =>
+							s.id ===
+							parent.id
+					)
+					.map((s) => {
+						return s;
+					});
+			},
 			__resolveReference(siteRepresentation: any) {
 				console.log("Site resolve reference", siteRepresentation)
 				return [
